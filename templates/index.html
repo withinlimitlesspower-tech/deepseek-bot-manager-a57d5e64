@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bot Manager | DeepSeek AI</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <h1>Bot Manager</h1>
+                </div>
+                <p class="subtitle">DeepSeek V3.2 Integration</p>
+            </div>
+
+            <!-- Create Bot Button -->
+            <button class="btn-create-bot" id="createBotBtn">
+                <i class="fas fa-plus-circle"></i>
+                Create New Bot
+            </button>
+
+            <!-- Search Bots -->
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchBots" placeholder="Search bots...">
+            </div>
+
+            <!-- Navigation -->
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="nav-item active" data-section="bots">
+                        <i class="fas fa-robot"></i>
+                        <span>🤖 Bots</span>
+                    </li>
+                    <li class="nav-item" data-section="chat">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>💬 Chat</span>
+                    </li>
+                    <li class="nav-item" data-section="analytics">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>📊 Analytics</span>
+                    </li>
+                    <li class="nav-item" data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>⚙️ Settings</span>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Bot List -->
+            <div class="bot-list-container">
+                <h3>Your Bots <span class="bot-count" id="botCount">0</span></h3>
+                <div class="bot-list" id="botList">
+                    <!-- Bots will be dynamically loaded here -->
+                    <div class="empty-state">
+                        <i class="fas fa-robot"></i>
+                        <p>No bots yet</p>
+                        <p class="small">Click "Create New Bot" to get started</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="sidebar-footer">
+                <div class="theme-toggle">
+                    <button id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                        <span>Dark Mode</span>
+                    </button>
+                </div>
+                <div class="api-status">
+                    <span class="status-dot" id="apiStatusDot"></span>
+                    <span id="apiStatusText">API: Checking...</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Bots Section (Default) -->
+            <section class="content-section active" id="botsSection">
+                <div class="section-header">
+                    <h2><i class="fas fa-robot"></i> Bot Management</h2>
+                    <p>Create, edit, and manage your AI bots powered by DeepSeek V3.2</p>
+                </div>
+                
+                <div class="bots-grid" id="botsGrid">
+                    <!-- Bots will be loaded here in grid view -->
+                </div>
+            </section>
+
+            <!-- Chat Section -->
+            <section class="content-section" id="chatSection">
+                <div class="chat-header">
+                    <div class="chat-bot-info">
+                        <div class="bot-avatar" id="chatBotAvatar">?</div>
+                        <div>
+                            <h2 id="chatBotName">Select a Bot</h2>
+                            <p class="bot-status" id="chatBotStatus">Choose a bot from the sidebar to start chatting</p>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="btn-secondary" id="clearChatBtn" disabled>
+                            <i class="fas fa-trash"></i> Clear Chat
+                        </button>
+                        <button class="btn-secondary" id="exportChatBtn" disabled>
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn-primary" id="githubPushBtn">
+                            <i class="fab fa-github"></i> Push to GitHub
+                        </button>
+                    </div>
+                </div>
+
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="empty-chat">
+                            <i class="fas fa-comments"></i>
+                            <h3>Start a Conversation</h3>
+                            <p>Select a bot from the sidebar and send your first message</p>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-container">
+                        <div class="typing-indicator" id="typingIndicator">
+                            <div class="typing-dots">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                            <span>Bot is typing...</span>
+                        </div>
+                        
+                        <div class="input-wrapper">
+                            <textarea 
+                                id="messageInput" 
+                                placeholder="Type your message here... (Press Enter to send, Shift+Enter for new line)"
+                                rows="3"
+                                disabled
+                            ></textarea>
+                            <div class="input-actions">
+                                <span class="char-count" id="charCount">0/4000</span>
+                                <button class="btn-send" id="sendMessageBtn" disabled>
+                                    <i class="fas fa-paper-plane"></i> Send
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-info">
+                            <span id="responseInfo"></span>
+                            <span id="tokenInfo"></span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Analytics Section -->
+            <section class="content-section" id="analyticsSection">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Analytics Dashboard</h2>
+                    <p>Monitor your bot usage and performance metrics</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="totalBots">0</h3>
+                            <p>Total Bots</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="activeBots">0</h3>
+                            <p>Active Bots</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="messagesToday">0</h3>
+                            <p>Messages Today</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-bolt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3 id="tokensUsed">0</h3>
+                            <p>Tokens Used</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Messages per Day (Last 7 Days)</h3>
+                        <canvas id="messagesChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Token Usage by Bot</h3>
+                        <canvas id="tokensChart"></
